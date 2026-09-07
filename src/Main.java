@@ -10,9 +10,11 @@ public class Main {
     private final JTextArea sourceEditor;
     private final JTextArea traceArea;
     private final JTextArea cpuArea;
+
     private JLabel statusLabel;
     private JLabel instructionLabel;
     private JLabel pcLabel;
+
     private int stepNumber = 1;
     private boolean programLoaded = false;
 
@@ -24,23 +26,40 @@ public class Main {
     private static final Color ACCENT = new Color(105, 125, 255);
 
     public Main() {
+
         simulator = new Simulator();
 
         JFrame frame = new JFrame(
                 "STC89C52 Microcontroller Simulator"
         );
 
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(
+                JFrame.EXIT_ON_CLOSE
+        );
+
         frame.setSize(1280, 760);
-        frame.setMinimumSize(new Dimension(1000, 650));
+        frame.setMinimumSize(
+                new Dimension(1000, 650)
+        );
+
         frame.setLocationRelativeTo(null);
 
-        JPanel root = new JPanel(new BorderLayout(12, 12));
+        JPanel root = new JPanel(
+                new BorderLayout(12, 12)
+        );
+
         root.setBackground(BG);
-        root.setBorder(new EmptyBorder(14, 14, 14, 14));
+
+        root.setBorder(
+                new EmptyBorder(14, 14, 14, 14)
+        );
+
         frame.setContentPane(root);
 
-        root.add(createHeader(), BorderLayout.NORTH);
+        root.add(
+                createHeader(),
+                BorderLayout.NORTH
+        );
 
         sourceEditor = createEditor();
         traceArea = createOutputArea();
@@ -64,25 +83,39 @@ public class Main {
         JPanel center = new JPanel(
                 new GridLayout(1, 3, 12, 0)
         );
+
         center.setOpaque(false);
 
-        center.add(createPanel(
-                "ASSEMBLY PROGRAM",
-                createEditorScroll()
-        ));
+        center.add(
+                createPanel(
+                        "ASSEMBLY PROGRAM",
+                        createEditorScroll()
+                )
+        );
 
-        center.add(createPanel(
-                "EXECUTION TRACE",
-                createTraceScroll()
-        ));
+        center.add(
+                createPanel(
+                        "EXECUTION TRACE",
+                        createTraceScroll()
+                )
+        );
 
-        center.add(createPanel(
-                "CPU STATE",
-                createCpuScroll()
-        ));
+        center.add(
+                createPanel(
+                        "CPU STATE",
+                        createCpuScroll()
+                )
+        );
 
-        root.add(center, BorderLayout.CENTER);
-        root.add(createBottomBar(), BorderLayout.SOUTH);
+        root.add(
+                center,
+                BorderLayout.CENTER
+        );
+
+        root.add(
+                createBottomBar(),
+                BorderLayout.SOUTH
+        );
 
         updateDisplay();
 
@@ -102,7 +135,11 @@ public class Main {
         );
 
         title.setFont(
-                new Font("SansSerif", Font.BOLD, 22)
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        22
+                )
         );
 
         title.setForeground(TEXT);
@@ -112,7 +149,11 @@ public class Main {
         );
 
         subtitle.setFont(
-                new Font("SansSerif", Font.PLAIN, 12)
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        12
+                )
         );
 
         subtitle.setForeground(MUTED);
@@ -129,7 +170,9 @@ public class Main {
         );
 
         titles.add(title);
-        titles.add(Box.createVerticalStrut(3));
+        titles.add(
+                Box.createVerticalStrut(3)
+        );
         titles.add(subtitle);
 
         header.add(
@@ -137,10 +180,16 @@ public class Main {
                 BorderLayout.WEST
         );
 
-        JLabel team = new JLabel("ONJI BYTE");
+        JLabel team = new JLabel(
+                "ONJI BYTE"
+        );
 
         team.setFont(
-                new Font("SansSerif", Font.BOLD, 13)
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        13
+                )
         );
 
         team.setForeground(ACCENT);
@@ -257,6 +306,7 @@ public class Main {
         );
 
         area.setLineWrap(false);
+
         area.setTabSize(4);
 
         area.setBorder(
@@ -292,7 +342,9 @@ public class Main {
         );
 
         area.setCaretColor(Color.WHITE);
+
         area.setLineWrap(false);
+
         area.setEditable(false);
 
         area.setBorder(
@@ -376,7 +428,10 @@ public class Main {
         buttons.setOpaque(false);
 
         JButton load =
-                createButton("LOAD", ACCENT);
+                createButton(
+                        "LOAD",
+                        ACCENT
+                );
 
         JButton reset =
                 createButton(
@@ -424,7 +479,9 @@ public class Main {
         info.setOpaque(false);
 
         instructionLabel =
-                new JLabel("Instruction: -");
+                new JLabel(
+                        "Instruction: -"
+                );
 
         instructionLabel.setForeground(MUTED);
 
@@ -437,7 +494,9 @@ public class Main {
         );
 
         statusLabel =
-                new JLabel("●  READY");
+                new JLabel(
+                        "●  READY"
+                );
 
         statusLabel.setForeground(
                 new Color(90, 210, 145)
@@ -455,7 +514,9 @@ public class Main {
         info.add(statusLabel);
 
         pcLabel =
-                new JLabel("PC: 0000");
+                new JLabel(
+                        "PC: 0000"
+                );
 
         pcLabel.setForeground(MUTED);
 
@@ -502,7 +563,9 @@ public class Main {
         );
 
         button.setForeground(Color.WHITE);
+
         button.setBackground(background);
+
         button.setFocusPainted(false);
 
         button.setBorder(
@@ -573,6 +636,7 @@ public class Main {
             simulator.loadProgram(program);
 
             programLoaded = true;
+
             stepNumber = 1;
 
             traceArea.setText(
@@ -735,7 +799,9 @@ public class Main {
         );
 
         traceArea.setCaretPosition(
-                traceArea.getDocument().getLength()
+                traceArea
+                        .getDocument()
+                        .getLength()
         );
     }
 
@@ -744,6 +810,7 @@ public class Main {
         simulator.reset();
 
         programLoaded = false;
+
         stepNumber = 1;
 
         traceArea.setText(
@@ -759,7 +826,9 @@ public class Main {
     private void updateDisplay() {
 
         cpuArea.setText(
-                simulator.getCPU().getState()
+                simulator
+                        .getCPU()
+                        .getState()
         );
 
         Instruction instruction =
@@ -770,7 +839,8 @@ public class Main {
                 (
                         instruction == null
                                 ? "-"
-                                : instruction.getFullInstruction()
+                                : instruction
+                                .getFullInstruction()
                 )
         );
 
@@ -788,7 +858,11 @@ public class Main {
         ) {
 
             statusLabel.setForeground(
-                    new Color(235, 100, 100)
+                    new Color(
+                            235,
+                            100,
+                            100
+                    )
             );
 
         } else if (
@@ -800,20 +874,30 @@ public class Main {
         ) {
 
             statusLabel.setForeground(
-                    new Color(90, 210, 145)
+                    new Color(
+                            90,
+                            210,
+                            145
+                    )
             );
 
         } else {
 
             statusLabel.setForeground(
-                    new Color(255, 190, 80)
+                    new Color(
+                            255,
+                            190,
+                            80
+                    )
             );
         }
 
         pcLabel.setText(
                 String.format(
                         "PC: %04X",
-                        simulator.getCPU().getPC()
+                        simulator
+                                .getCPU()
+                                .getPC()
                 )
         );
     }
@@ -888,4 +972,4 @@ public class Main {
                 Main::new
         );
     }
-                    }
+            }
