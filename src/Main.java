@@ -1,752 +1,433 @@
 import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
 
-    private final Simulator simulator;
-    private final JTextArea sourceEditor;
-    private final JTextArea traceArea;
-    private final JTextArea cpuArea;
+    private final Simulator simulator = new Simulator();
+
+    private JTextArea sourceEditor;
+    private JTextArea traceArea;
+    private JTextArea cpuArea;
 
     private JLabel statusLabel;
     private JLabel instructionLabel;
     private JLabel pcLabel;
+    private JLabel titleLabel;
 
-    private int stepNumber = 1;
     private boolean programLoaded = false;
+    private int stepNumber = 1;
+    private boolean darkMode = true;
 
-    private static final Color BG = new Color(18, 20, 27);
-    private static final Color PANEL = new Color(27, 30, 39);
-    private static final Color BORDER = new Color(57, 61, 75);
-    private static final Color TEXT = new Color(235, 238, 245);
-    private static final Color MUTED = new Color(160, 166, 180);
-    private static final Color ACCENT = new Color(105, 125, 255);
+    private Timer pulseTimer;
+    private float pulse = 0f;
+
+    private static final Color DARK_BG = new Color(12, 14, 22);
+    private static final Color DARK_PANEL = new Color(24, 27, 38);
+    private static final Color DARK_INPUT = new Color(15, 18, 27);
+    private static final Color DARK_TEXT = new Color(235, 238, 247);
+    private static final Color DARK_MUTED = new Color(155, 163, 181);
+    private static final Color LIGHT_BG = new Color(242, 244, 249);
+    private static final Color LIGHT_PANEL = Color.WHITE;
+    private static final Color LIGHT_INPUT = new Color(247, 248, 252);
+    private static final Color LIGHT_TEXT = new Color(30, 34, 45);
+    private static final Color LIGHT_MUTED = new Color(100, 108, 125);
+
+    private static final Color ACCENT = new Color(115, 95, 255);
+    private static final Color ACCENT_2 = new Color(70, 190, 255);
+    private static final Color GREEN = new Color(70, 205, 135);
+
+    private JFrame frame;
+    private JPanel root;
+    private JPanel header;
+    private JPanel center;
+    private JPanel bottom;
 
     public Main() {
+        buildUI();
+        startAnimation();
+    }
 
-        simulator = new Simulator();
-
-        JFrame frame = new JFrame(
-                "STC89C52 Microcontroller Simulator"
-        );
-
-        frame.setDefaultCloseOperation(
-                JFrame.EXIT_ON_CLOSE
-        );
-
-        frame.setSize(1280, 760);
-        frame.setMinimumSize(
-                new Dimension(1000, 650)
-        );
-
+    private void buildUI() {
+        frame = new JFrame("STC89C52 Microcontroller Simulator");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(1320, 790);
+        frame.setMinimumSize(new Dimension(1050, 680));
         frame.setLocationRelativeTo(null);
 
-        JPanel root = new JPanel(
-                new BorderLayout(12, 12)
-        );
-
-        root.setBackground(BG);
-
-        root.setBorder(
-                new EmptyBorder(14, 14, 14, 14)
-        );
-
+        root = new JPanel(new BorderLayout(14, 14));
+        root.setBorder(new EmptyBorder(16, 16, 14, 16));
         frame.setContentPane(root);
 
-        root.add(
-                createHeader(),
-                BorderLayout.NORTH
-        );
+        header = createHeader();
 
         sourceEditor = createEditor();
         traceArea = createOutputArea();
         cpuArea = createOutputArea();
 
         sourceEditor.setText(
-                "MOV A,#02\n" +
-                "MOV R0,#04\n" +
-                "XCH A,R0\n" +
-                "ADD A,#03\n" +
-                "INC A\n" +
-                "DEC A\n" +
-                "ANL A,#0F\n" +
-                "ORL A,#01\n" +
-                "SJMP 1\n" +
-                "INC A\n" +
-                "CLR A\n" +
-                "END"
+            "MOV A,#02\n" +
+            "MOV R0,#04\n" +
+            "XCH A,R0\n" +
+            "ADD A,#03\n" +
+            "INC A\n" +
+            "DEC A\n" +
+            "ANL A,#0F\n" +
+            "ORL A,#01\n" +
+            "SJMP 1\n" +
+            "INC A\n" +
+            "CLR A\n" +
+            "END"
         );
 
-        JPanel center = new JPanel(
-                new GridLayout(1, 3, 12, 0)
-        );
-
+        center = new JPanel(new GridLayout(1, 3, 14, 0));
         center.setOpaque(false);
 
-        center.add(
-                createPanel(
-                        "ASSEMBLY PROGRAM",
-                        createEditorScroll()
-                )
-        );
+        center.add(createPanel("ASSEMBLY PROGRAM", new JScrollPane(sourceEditor)));
+        center.add(createPanel("EXECUTION TRACE", new JScrollPane(traceArea)));
+        center.add(createPanel("CPU STATE", new JScrollPane(cpuArea)));
 
-        center.add(
-                createPanel(
-                        "EXECUTION TRACE",
-                        createTraceScroll()
-                )
-        );
+        bottom = createBottomBar();
 
-        center.add(
-                createPanel(
-                        "CPU STATE",
-                        createCpuScroll()
-                )
-        );
+        root.add(header, BorderLayout.NORTH);
+        root.add(center, BorderLayout.CENTER);
+        root.add(bottom, BorderLayout.SOUTH);
 
-        root.add(
-                center,
-                BorderLayout.CENTER
-        );
-
-        root.add(
-                createBottomBar(),
-                BorderLayout.SOUTH
-        );
-
+        applyTheme();
         updateDisplay();
 
         frame.setVisible(true);
     }
 
     private JPanel createHeader() {
+        JPanel panel = new GradientPanel();
+        panel.setLayout(new BorderLayout(15, 5));
+        panel.setBorder(new EmptyBorder(16, 18, 16, 18));
 
-        JPanel header = new JPanel(
-                new BorderLayout()
-        );
+        JPanel left = new JPanel();
+        left.setOpaque(false);
+        left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
 
-        header.setOpaque(false);
-
-        JLabel title = new JLabel(
-                "STC89C52  MICROCONTROLLER  SIMULATOR"
-        );
-
-        title.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        22
-                )
-        );
-
-        title.setForeground(TEXT);
+        titleLabel = new JLabel("STC89C52  MICROCONTROLLER  SIMULATOR");
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 23));
 
         JLabel subtitle = new JLabel(
-                "Week 2  •  8051 Architecture  •  Instruction Execution"
+            "Week 2  •  8051 Architecture  •  Instruction Execution"
         );
+        subtitle.setFont(new Font("SansSerif", Font.PLAIN, 12));
 
-        subtitle.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.PLAIN,
-                        12
-                )
-        );
+        left.add(titleLabel);
+        left.add(Box.createVerticalStrut(5));
+        left.add(subtitle);
 
-        subtitle.setForeground(MUTED);
+        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        right.setOpaque(false);
 
-        JPanel titles = new JPanel();
+        JLabel chip = badge("●  8-BIT CPU");
+        JLabel team = badge("ONJI BYTE");
 
-        titles.setOpaque(false);
+        JButton mode = new JButton("☀ / ☾");
+        mode.setToolTipText("Toggle light / dark mode");
+        styleButton(mode, new Color(65, 70, 88));
+        mode.addActionListener(e -> {
+            darkMode = !darkMode;
+            applyTheme();
+        });
 
-        titles.setLayout(
-                new BoxLayout(
-                        titles,
-                        BoxLayout.Y_AXIS
-                )
-        );
+        right.add(chip);
+        right.add(team);
+        right.add(mode);
 
-        titles.add(title);
-        titles.add(
-                Box.createVerticalStrut(3)
-        );
-        titles.add(subtitle);
+        panel.add(left, BorderLayout.WEST);
+        panel.add(right, BorderLayout.EAST);
 
-        header.add(
-                titles,
-                BorderLayout.WEST
-        );
-
-        JLabel team = new JLabel(
-                "ONJI BYTE"
-        );
-
-        team.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        13
-                )
-        );
-
-        team.setForeground(ACCENT);
-
-        team.setBorder(
-                new CompoundBorder(
-                        new LineBorder(
-                                ACCENT,
-                                1,
-                                true
-                        ),
-                        new EmptyBorder(
-                                6,
-                                10,
-                                6,
-                                10
-                        )
-                )
-        );
-
-        header.add(
-                team,
-                BorderLayout.EAST
-        );
-
-        return header;
+        return panel;
     }
 
-    private JPanel createPanel(
-            String title,
-            JComponent component
-    ) {
+    private JLabel badge(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("SansSerif", Font.BOLD, 11));
+        label.setBorder(new EmptyBorder(7, 10, 7, 10));
+        return label;
+    }
 
-        JPanel panel = new JPanel(
-                new BorderLayout()
-        );
-
-        panel.setBackground(PANEL);
-
-        panel.setBorder(
-                new CompoundBorder(
-                        new LineBorder(
-                                BORDER,
-                                1,
-                                true
-                        ),
-                        new EmptyBorder(
-                                10,
-                                10,
-                                10,
-                                10
-                        )
-                )
-        );
+    private JPanel createPanel(String title, JComponent component) {
+        JPanel panel = new RoundedPanel();
+        panel.setLayout(new BorderLayout(0, 9));
+        panel.setBorder(new EmptyBorder(12, 12, 12, 12));
 
         JLabel label = new JLabel(title);
+        label.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        label.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        12
-                )
-        );
+        JScrollPane scroll = (JScrollPane) component;
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        scroll.getVerticalScrollBar().setUnitIncrement(14);
+        scroll.getHorizontalScrollBar().setUnitIncrement(14);
 
-        label.setForeground(TEXT);
-
-        label.setBorder(
-                new EmptyBorder(
-                        0,
-                        2,
-                        8,
-                        0
-                )
-        );
-
-        panel.add(
-                label,
-                BorderLayout.NORTH
-        );
-
-        panel.add(
-                component,
-                BorderLayout.CENTER
-        );
+        panel.add(label, BorderLayout.NORTH);
+        panel.add(scroll, BorderLayout.CENTER);
 
         return panel;
     }
 
     private JTextArea createEditor() {
-
         JTextArea area = new JTextArea();
-
-        area.setFont(
-                new Font(
-                        Font.MONOSPACED,
-                        Font.PLAIN,
-                        15
-                )
-        );
-
-        area.setForeground(
-                new Color(220, 225, 238)
-        );
-
-        area.setBackground(
-                new Color(20, 23, 31)
-        );
-
-        area.setCaretColor(Color.WHITE);
-
-        area.setSelectionColor(
-                new Color(65, 75, 105)
-        );
-
+        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 15));
         area.setLineWrap(false);
-
         area.setTabSize(4);
-
-        area.setBorder(
-                new EmptyBorder(
-                        10,
-                        10,
-                        10,
-                        10
-                )
-        );
-
+        area.setCaretColor(Color.WHITE);
+        area.setBorder(new EmptyBorder(12, 12, 12, 12));
         return area;
     }
 
     private JTextArea createOutputArea() {
-
         JTextArea area = new JTextArea();
-
-        area.setFont(
-                new Font(
-                        Font.MONOSPACED,
-                        Font.PLAIN,
-                        13
-                )
-        );
-
-        area.setForeground(
-                new Color(220, 225, 238)
-        );
-
-        area.setBackground(
-                new Color(20, 23, 31)
-        );
-
-        area.setCaretColor(Color.WHITE);
-
+        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         area.setLineWrap(false);
-
         area.setEditable(false);
-
-        area.setBorder(
-                new EmptyBorder(
-                        10,
-                        10,
-                        10,
-                        10
-                )
-        );
-
+        area.setBorder(new EmptyBorder(12, 12, 12, 12));
         return area;
     }
 
-    private JScrollPane createEditorScroll() {
-
-        JScrollPane scroll =
-                new JScrollPane(sourceEditor);
-
-        styleScroll(scroll);
-
-        return scroll;
-    }
-
-    private JScrollPane createTraceScroll() {
-
-        JScrollPane scroll =
-                new JScrollPane(traceArea);
-
-        styleScroll(scroll);
-
-        return scroll;
-    }
-
-    private JScrollPane createCpuScroll() {
-
-        JScrollPane scroll =
-                new JScrollPane(cpuArea);
-
-        styleScroll(scroll);
-
-        return scroll;
-    }
-
-    private void styleScroll(
-            JScrollPane scroll
-    ) {
-
-        scroll.setBorder(
-                new LineBorder(
-                        BORDER,
-                        1,
-                        true
-                )
-        );
-
-        scroll.getViewport().setBackground(
-                new Color(20, 23, 31)
-        );
-
-        scroll.getVerticalScrollBar()
-                .setUnitIncrement(14);
-    }
-
     private JPanel createBottomBar() {
+        JPanel panel = new JPanel(new BorderLayout(12, 8));
+        panel.setOpaque(false);
 
-        JPanel bottom = new JPanel(
-                new BorderLayout(10, 8)
-        );
-
-        bottom.setOpaque(false);
-
-        JPanel buttons = new JPanel(
-                new FlowLayout(
-                        FlowLayout.LEFT,
-                        8,
-                        0
-                )
-        );
-
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         buttons.setOpaque(false);
 
-        JButton load =
-                createButton(
-                        "LOAD",
-                        ACCENT
-                );
-
-        JButton reset =
-                createButton(
-                        "RESET",
-                        new Color(75, 80, 95)
-                );
-
-        JButton step =
-                createButton(
-                        "STEP",
-                        new Color(75, 80, 95)
-                );
-
-        JButton run =
-                createButton(
-                        "RUN",
-                        new Color(75, 80, 95)
-                );
+        JButton load = createActionButton("LOAD", ACCENT);
+        JButton reset = createActionButton("RESET", new Color(70, 76, 94));
+        JButton step = createActionButton("STEP", new Color(70, 76, 94));
+        JButton run = createActionButton("RUN ▶", new Color(45, 155, 105));
 
         buttons.add(load);
         buttons.add(reset);
         buttons.add(step);
         buttons.add(run);
 
-        load.addActionListener(
-                e -> loadFromEditor()
-        );
+        load.addActionListener(e -> loadFromEditor());
+        reset.addActionListener(e -> resetSimulator());
+        step.addActionListener(e -> stepOnce());
+        run.addActionListener(e -> runProgram());
 
-        reset.addActionListener(
-                e -> resetSimulator()
-        );
-
-        step.addActionListener(
-                e -> stepOnce()
-        );
-
-        run.addActionListener(
-                e -> runProgram()
-        );
-
-        JPanel info = new JPanel(
-                new GridLayout(2, 1)
-        );
-
+        JPanel info = new JPanel(new GridLayout(2, 1));
         info.setOpaque(false);
 
-        instructionLabel =
-                new JLabel(
-                        "Instruction: -"
-                );
-
-        instructionLabel.setForeground(MUTED);
-
-        instructionLabel.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.PLAIN,
-                        12
-                )
-        );
-
-        statusLabel =
-                new JLabel(
-                        "●  READY"
-                );
-
-        statusLabel.setForeground(
-                new Color(90, 210, 145)
-        );
-
-        statusLabel.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        12
-                )
-        );
+        instructionLabel = new JLabel("Instruction: -");
+        statusLabel = new JLabel("● READY");
 
         info.add(instructionLabel);
         info.add(statusLabel);
 
-        pcLabel =
-                new JLabel(
-                        "PC: 0000"
-                );
+        pcLabel = new JLabel("PC: 0000");
+        pcLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 12));
 
-        pcLabel.setForeground(MUTED);
+        panel.add(buttons, BorderLayout.WEST);
+        panel.add(info, BorderLayout.CENTER);
+        panel.add(pcLabel, BorderLayout.EAST);
 
-        pcLabel.setFont(
-                new Font(
-                        Font.MONOSPACED,
-                        Font.BOLD,
-                        12
-                )
-        );
-
-        bottom.add(
-                buttons,
-                BorderLayout.WEST
-        );
-
-        bottom.add(
-                info,
-                BorderLayout.CENTER
-        );
-
-        bottom.add(
-                pcLabel,
-                BorderLayout.EAST
-        );
-
-        return bottom;
+        return panel;
     }
 
-    private JButton createButton(
-            String text,
-            Color background
-    ) {
+    private JButton createActionButton(String text, Color base) {
+        JButton button = new JButton(text);
+        styleButton(button, base);
 
-        JButton button =
-                new JButton(text);
+        button.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                button.setFont(new Font("SansSerif", Font.BOLD, 13));
+                button.setBorder(new EmptyBorder(8, 20, 8, 20));
+            }
 
-        button.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        12
-                )
-        );
-
-        button.setForeground(Color.WHITE);
-
-        button.setBackground(background);
-
-        button.setFocusPainted(false);
-
-        button.setBorder(
-                new CompoundBorder(
-                        new LineBorder(
-                                BORDER,
-                                1,
-                                true
-                        ),
-                        new EmptyBorder(
-                                8,
-                                18,
-                                8,
-                                18
-                        )
-                )
-        );
-
-        button.setCursor(
-                new Cursor(
-                        Cursor.HAND_CURSOR
-                )
-        );
+            public void mouseExited(MouseEvent e) {
+                button.setFont(new Font("SansSerif", Font.BOLD, 12));
+                button.setBorder(new EmptyBorder(8, 18, 8, 18));
+            }
+        });
 
         return button;
     }
 
+    private void styleButton(JButton button, Color base) {
+        button.setFont(new Font("SansSerif", Font.BOLD, 12));
+        button.setForeground(Color.WHITE);
+        button.setBackground(base);
+        button.setFocusPainted(false);
+        button.setBorder(new EmptyBorder(8, 12, 8, 12));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    }
+
+    private void applyTheme() {
+        Color bg = darkMode ? DARK_BG : LIGHT_BG;
+        Color panel = darkMode ? DARK_PANEL : LIGHT_PANEL;
+        Color input = darkMode ? DARK_INPUT : LIGHT_INPUT;
+        Color text = darkMode ? DARK_TEXT : LIGHT_TEXT;
+        Color muted = darkMode ? DARK_MUTED : LIGHT_MUTED;
+
+        root.setBackground(bg);
+
+        sourceEditor.setBackground(input);
+        sourceEditor.setForeground(text);
+        sourceEditor.setCaretColor(text);
+
+        traceArea.setBackground(input);
+        traceArea.setForeground(text);
+
+        cpuArea.setBackground(input);
+        cpuArea.setForeground(text);
+
+        if (titleLabel != null) {
+            titleLabel.setForeground(Color.WHITE);
+        }
+
+        updateComponentTree(root, panel, text, muted, input);
+        root.repaint();
+    }
+
+    private void updateComponentTree(
+            Component component,
+            Color panel,
+            Color text,
+            Color muted,
+            Color input
+    ) {
+        if (component instanceof RoundedPanel) {
+            component.setBackground(panel);
+        }
+
+        if (component instanceof JLabel) {
+            JLabel label = (JLabel) component;
+            if (label == instructionLabel || label == pcLabel) {
+                label.setForeground(muted);
+            } else if (label == statusLabel) {
+                label.setForeground(GREEN);
+            } else if (label != titleLabel) {
+                label.setForeground(text);
+            }
+        }
+
+        if (component instanceof JScrollPane) {
+            JScrollPane scroll = (JScrollPane) component;
+            scroll.getViewport().setBackground(input);
+        }
+
+        if (component instanceof Container) {
+            for (Component child : ((Container) component).getComponents()) {
+                updateComponentTree(child, panel, text, muted, input);
+            }
+        }
+    }
+
+    private void startAnimation() {
+        pulseTimer = new Timer(45, e -> {
+            pulse += 0.12f;
+            if (pulse > 6.28f) pulse = 0f;
+            if (statusLabel != null) {
+                int alpha = 170 + (int) (60 * (0.5 + 0.5 * Math.sin(pulse)));
+                statusLabel.setForeground(
+                    new Color(
+                        GREEN.getRed(),
+                        GREEN.getGreen(),
+                        GREEN.getBlue(),
+                        Math.min(255, alpha)
+                    )
+                );
+            }
+        });
+        pulseTimer.start();
+    }
+
     private String[] getProgramFromEditor() {
+        String[] raw = sourceEditor.getText().split("\\R");
+        List<String> program = new ArrayList<>();
 
-        String[] rawLines =
-                sourceEditor
-                        .getText()
-                        .split("\\R");
-
-        List<String> program =
-                new ArrayList<>();
-
-        for (String line : rawLines) {
-
+        for (String line : raw) {
             line = line.trim();
-
             if (!line.isEmpty()) {
                 program.add(line);
             }
         }
 
-        return program.toArray(
-                new String[0]
-        );
+        return program.toArray(new String[0]);
     }
 
     private void loadFromEditor() {
-
-        String[] program =
-                getProgramFromEditor();
+        String[] program = getProgramFromEditor();
 
         if (program.length == 0) {
-
-            showError(
-                    "Enter at least one instruction."
-            );
-
+            showError("Enter at least one instruction.");
             return;
         }
 
         try {
-
             simulator.loadProgram(program);
-
             programLoaded = true;
-
             stepNumber = 1;
 
             traceArea.setText(
-                    "PROGRAM LOADED\n" +
-                    "────────────────────────────────\n" +
-                    formatProgram(program)
+                "✓ PROGRAM LOADED\n" +
+                "────────────────────────────────────\n" +
+                formatProgram(program)
             );
 
             updateDisplay();
 
-        } catch (IllegalArgumentException ex) {
-
+        } catch (Exception ex) {
             programLoaded = false;
-
-            showError(
-                    "Invalid program:\n" +
-                    ex.getMessage()
-            );
-
-            updateDisplay();
+            showError("Invalid program:\n" + ex.getMessage());
         }
     }
 
-    private String formatProgram(
-            String[] program
-    ) {
-
-        StringBuilder text =
-                new StringBuilder();
+    private String formatProgram(String[] program) {
+        StringBuilder result = new StringBuilder();
 
         for (int i = 0; i < program.length; i++) {
-
-            text.append(
-                    String.format(
-                            "%04X   %s%n",
-                            i,
-                            program[i]
-                    )
+            result.append(
+                String.format("%04X   %s%n", i, program[i])
             );
         }
 
-        return text.toString();
+        return result.toString();
     }
 
     private void stepOnce() {
-
-        if (!ensureLoaded())
-            return;
+        if (!ensureLoaded()) return;
 
         if (isFinished()) {
-
-            showMessage(
-                    "Program finished. " +
-                    "Press RESET to start again."
-            );
-
+            showMessage("Program finished. Press RESET to start again.");
             return;
         }
 
         simulator.step();
-
         appendStepTrace();
-
         stepNumber++;
-
         updateDisplay();
     }
 
     private void runProgram() {
-
-        if (!ensureLoaded())
-            return;
+        if (!ensureLoaded()) return;
 
         if (isFinished()) {
-
-            showMessage(
-                    "Program finished. " +
-                    "Press RESET to start again."
-            );
-
+            showMessage("Program finished. Press RESET to start again.");
             return;
         }
 
         int safety = 0;
 
-        while (
-                safety < 1000 &&
-                !isFinished()
-        ) {
-
+        while (safety < 1000 && !isFinished()) {
             simulator.step();
-
             appendStepTrace();
-
             stepNumber++;
-
             safety++;
 
-            String status =
-                    simulator.getExecutionStatus();
+            String status = simulator.getExecutionStatus();
 
-            if (
-                    status.startsWith(
-                            "Execution error"
-                    )
-                    ||
-                    status.startsWith(
-                            "Unsupported instruction"
-                    )
-            ) {
+            if (status.startsWith("Execution error")
+                    || status.startsWith("Unsupported instruction")) {
                 break;
             }
         }
@@ -755,221 +436,189 @@ public class Main {
     }
 
     private void appendStepTrace() {
-
-        Instruction instruction =
-                simulator.getCurrentInstruction();
+        Instruction instruction = simulator.getCurrentInstruction();
 
         traceArea.append(
-                "\nSTEP " +
-                stepNumber +
-                "\n"
-        );
-
-        traceArea.append(
-                "────────────────────────────────\n"
+            "\nSTEP " + stepNumber + "\n" +
+            "────────────────────────────────────\n"
         );
 
         if (instruction != null) {
-
             traceArea.append(
-                    "Instruction : " +
-                    instruction.getFullInstruction() +
-                    "\n"
-            );
-
-            traceArea.append(
-                    "Category    : " +
-                    instruction.getCategory() +
-                    "\n\n"
+                "Instruction : " +
+                instruction.getFullInstruction() + "\n" +
+                "Category    : " +
+                instruction.getCategory() + "\n\n"
             );
         }
 
+        traceArea.append(simulator.getExecutionTrace());
+
         traceArea.append(
-                simulator.getExecutionTrace()
+            "STATUS : " +
+            simulator.getExecutionStatus() +
+            "\n"
         );
 
         traceArea.append(
-                "STATUS : " +
-                simulator.getExecutionStatus() +
-                "\n"
-        );
-
-        traceArea.append(
-                "════════════════════════════════\n"
+            "════════════════════════════════════\n"
         );
 
         traceArea.setCaretPosition(
-                traceArea
-                        .getDocument()
-                        .getLength()
+            traceArea.getDocument().getLength()
         );
     }
 
     private void resetSimulator() {
-
         simulator.reset();
-
         programLoaded = false;
-
         stepNumber = 1;
 
         traceArea.setText(
-                "READY\n\n" +
-                "Edit the assembly program " +
-                "and press LOAD.\n" +
-                "Then use STEP or RUN to execute it."
+            "READY\n\n" +
+            "Edit the assembly program and press LOAD.\n" +
+            "Then use STEP or RUN to execute it."
         );
 
         updateDisplay();
     }
 
     private void updateDisplay() {
-
-        cpuArea.setText(
-                simulator
-                        .getCPU()
-                        .getState()
-        );
+        cpuArea.setText(simulator.getCPU().getState());
 
         Instruction instruction =
-                simulator.getCurrentInstruction();
+            simulator.getCurrentInstruction();
 
         instructionLabel.setText(
-                "Instruction: " +
-                (
-                        instruction == null
-                                ? "-"
-                                : instruction
-                                .getFullInstruction()
-                )
+            "Instruction: " +
+            (instruction == null
+                ? "-"
+                : instruction.getFullInstruction())
         );
 
-        String status =
-                simulator.getExecutionStatus();
+        String status = simulator.getExecutionStatus();
 
         statusLabel.setText(
-                "●  " +
-                status.toUpperCase()
+            "●  " + status.toUpperCase()
         );
 
-        if (
-                status.toLowerCase()
-                        .contains("error")
-        ) {
-
-            statusLabel.setForeground(
-                    new Color(
-                            235,
-                            100,
-                            100
-                    )
-            );
-
-        } else if (
-                status.toLowerCase()
-                        .contains("terminated")
-                ||
-                status.toLowerCase()
-                        .contains("finished")
-        ) {
-
-            statusLabel.setForeground(
-                    new Color(
-                            90,
-                            210,
-                            145
-                    )
-            );
-
-        } else {
-
-            statusLabel.setForeground(
-                    new Color(
-                            255,
-                            190,
-                            80
-                    )
-            );
-        }
-
         pcLabel.setText(
-                String.format(
-                        "PC: %04X",
-                        simulator
-                                .getCPU()
-                                .getPC()
-                )
+            String.format(
+                "PC: %04X",
+                simulator.getCPU().getPC()
+            )
         );
     }
 
     private boolean ensureLoaded() {
-
         if (!programLoaded) {
-
-            showMessage(
-                    "Load the assembly program first."
-            );
-
+            showMessage("Load the assembly program first.");
             return false;
         }
-
         return true;
     }
 
     private boolean isFinished() {
+        String status = simulator.getExecutionStatus();
 
-        String status =
-                simulator.getExecutionStatus();
-
-        return status.equals(
-                "Program terminated"
-        )
-                ||
-                status.equals(
-                        "Program finished"
-                );
+        return status.equals("Program terminated")
+            || status.equals("Program finished");
     }
 
-    private void showMessage(
-            String message
-    ) {
-
+    private void showMessage(String message) {
         JOptionPane.showMessageDialog(
-                null,
-                message,
-                "STC89C52 Simulator",
-                JOptionPane.INFORMATION_MESSAGE
+            frame,
+            message,
+            "STC89C52 Simulator",
+            JOptionPane.INFORMATION_MESSAGE
         );
     }
 
-    private void showError(
-            String message
-    ) {
-
+    private void showError(String message) {
         JOptionPane.showMessageDialog(
-                null,
-                message,
-                "STC89C52 Simulator - Error",
-                JOptionPane.ERROR_MESSAGE
+            frame,
+            message,
+            "STC89C52 Simulator - Error",
+            JOptionPane.ERROR_MESSAGE
         );
     }
 
-    public static void main(
-            String[] args
-    ) {
+    private class RoundedPanel extends JPanel {
+        RoundedPanel() {
+            setOpaque(false);
+        }
 
-        try {
-
-            UIManager.setLookAndFeel(
-                    UIManager
-                            .getSystemLookAndFeelClassName()
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON
             );
 
+            Color fill = darkMode ? DARK_PANEL : LIGHT_PANEL;
+            Color border = darkMode
+                ? new Color(55, 61, 78)
+                : new Color(218, 222, 232);
+
+            g2.setColor(fill);
+            g2.fillRoundRect(
+                0, 0, getWidth() - 1, getHeight() - 1,
+                16, 16
+            );
+
+            g2.setColor(border);
+            g2.drawRoundRect(
+                0, 0, getWidth() - 1, getHeight() - 1,
+                16, 16
+            );
+
+            g2.dispose();
+            super.paintComponent(g);
+        }
+    }
+
+    private class GradientPanel extends JPanel {
+        GradientPanel() {
+            setOpaque(false);
+        }
+
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON
+            );
+
+            GradientPaint gradient = new GradientPaint(
+                0, 0,
+                new Color(48, 39, 100),
+                getWidth(),
+                getHeight(),
+                new Color(20, 90, 130)
+            );
+
+            g2.setPaint(gradient);
+            g2.fillRoundRect(
+                0, 0,
+                getWidth(),
+                getHeight(),
+                18,
+                18
+            );
+
+            g2.dispose();
+            super.paintComponent(g);
+        }
+    }
+
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(
+                UIManager.getSystemLookAndFeelClassName()
+            );
         } catch (Exception ignored) {
         }
 
-        SwingUtilities.invokeLater(
-                Main::new
-        );
+        SwingUtilities.invokeLater(Main::new);
     }
-            }
+}
