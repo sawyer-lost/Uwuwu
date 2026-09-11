@@ -3,6 +3,8 @@
 Week 3 extends the existing simulator with Memory, Stack, and FIFO Queue functionality while keeping the completed Week 2 instruction set.
 
 ## Week 3 additions
+
+For a quick guide to the project files, see [`Docs/README.md`](Docs/README.md).
 - Memory Read/Write and reset support.
 - Stack Pointer (SP) handling.
 - PUSH and POP operations.
@@ -137,7 +139,7 @@ Expected FIFO result: `R0=0A`, `R1=14`, `A=1E`.
 
 ## Queue validation
 
-The Queue flowchart is available in `Docs/Week-3/QUEUE_FLOWCHART.md` and the processor-specific validation program is in `programs/week3_queue_validation.txt`.
+The Queue flowchart logic is documented in `Docs/Week-3/QUEUE_FLOWCHART.md`. For the final submission, the same flowchart can be redrawn neatly by hand and saved as an image in the `images/` folder. The processor-specific validation program is in `programs/week3_queue_validation.txt`.
 
 ## Automated Week 3 tests
 

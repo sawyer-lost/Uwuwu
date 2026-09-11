@@ -1,30 +1,34 @@
-# Week 3 - FIFO Queue Flowchart
+# Week 3 Queue Flowchart
+
+The Queue flowchart should show this logic when transferred to the final handwritten flowchart:
 
 ```text
-          START
-            |
-            v
-       Queue operation?
-        /           \
-   ENQUEUE          DEQUEUE
-      |                |
-      v                v
-   Is Full?         Is Empty?
-    /   \             /   \
-  YES    NO          YES    NO
-   |      |           |      |
-  Error   v          Error   v
-        Insert              Remove
-        at Rear             at Front
-           \                /
-            v              v
-              Update size
-                   |
-                   v
-              Queue status
-                   |
-                   v
-                  END
+START
+  |
+  v
+Choose Queue Operation
+  |
+  +----------------------+
+  |                      |
+Enqueue                Dequeue
+  |                      |
+Queue Full?            Queue Empty?
+  |                      |
+ Yes -> Full Error     Yes -> Empty Error
+  |
+ No                     No
+  |                      |
+Add at Rear           Remove from Front
+  |                      |
+Update Rear/Size      Update Front/Size
+  |                      |
+  +----------+-----------+
+             |
+             v
+       Update Queue Status
+             |
+             v
+            END
 ```
 
-The queue uses circular indexing, so the rear wraps to index 0 when it reaches the capacity limit.
+For the submission, this can be redrawn neatly by hand and added as an image to the `images/` folder.
