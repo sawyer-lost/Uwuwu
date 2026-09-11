@@ -31,6 +31,12 @@ public class InstructionSet {
 
         // Program Termination
         instructionCategories.put("END", "Program Termination");
+
+        // Week 3: Stack and FIFO Queue
+        instructionCategories.put("PUSH", "Stack");
+        instructionCategories.put("POP", "Stack");
+        instructionCategories.put("ENQUEUE", "FIFO Queue");
+        instructionCategories.put("DEQUEUE", "FIFO Queue");
     }
 
     public boolean isSupported(String instruction) {

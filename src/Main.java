@@ -25,41 +25,20 @@ public class Main {
     private Timer pulseTimer;
     private float pulse = 0f;
 
-    private static final Color DARK_BG =
-        new Color(12, 14, 22);
+    private static final Color DARK_BG = new Color(12, 14, 22);
+    private static final Color DARK_PANEL = new Color(24, 27, 38);
+    private static final Color DARK_INPUT = new Color(15, 18, 27);
+    private static final Color DARK_TEXT = new Color(235, 238, 247);
+    private static final Color DARK_MUTED = new Color(155, 163, 181);
 
-    private static final Color DARK_PANEL =
-        new Color(24, 27, 38);
+    private static final Color LIGHT_BG = new Color(242, 244, 249);
+    private static final Color LIGHT_PANEL = Color.WHITE;
+    private static final Color LIGHT_INPUT = new Color(247, 248, 252);
+    private static final Color LIGHT_TEXT = new Color(30, 34, 45);
+    private static final Color LIGHT_MUTED = new Color(100, 108, 125);
 
-    private static final Color DARK_INPUT =
-        new Color(15, 18, 27);
-
-    private static final Color DARK_TEXT =
-        new Color(235, 238, 247);
-
-    private static final Color DARK_MUTED =
-        new Color(155, 163, 181);
-
-    private static final Color LIGHT_BG =
-        new Color(242, 244, 249);
-
-    private static final Color LIGHT_PANEL =
-        Color.WHITE;
-
-    private static final Color LIGHT_INPUT =
-        new Color(247, 248, 252);
-
-    private static final Color LIGHT_TEXT =
-        new Color(30, 34, 45);
-
-    private static final Color LIGHT_MUTED =
-        new Color(100, 108, 125);
-
-    private static final Color ACCENT =
-        new Color(115, 95, 255);
-
-    private static final Color GREEN =
-        new Color(70, 205, 135);
+    private static final Color ACCENT = new Color(115, 95, 255);
+    private static final Color GREEN = new Color(70, 205, 135);
 
     private JFrame frame;
     private JPanel root;
@@ -82,9 +61,6 @@ public class Main {
             JFrame.EXIT_ON_CLOSE
         );
 
-        /*
-         * Phone-friendly size
-         */
         frame.setSize(900, 700);
 
         frame.setMinimumSize(
@@ -111,26 +87,22 @@ public class Main {
         header = createHeader();
 
         sourceEditor = createEditor();
-
         traceArea = createOutputArea();
-
         cpuArea = createOutputArea();
 
-        /*
-         * Default demonstration program
-         */
         sourceEditor.setText(
-            "MOV A,#02\n" +
-            "MOV R0,#04\n" +
-            "XCH A,R0\n" +
-            "ADD A,#03\n" +
-            "INC A\n" +
-            "DEC A\n" +
-            "ANL A,#0F\n" +
-            "ORL A,#01\n" +
-            "SJMP 1\n" +
-            "INC A\n" +
-            "CLR A\n" +
+            "MOV A,#10\n" +
+            "ENQUEUE A\n" +
+            "MOV A,#20\n" +
+            "ENQUEUE A\n" +
+            "MOV A,#30\n" +
+            "ENQUEUE A\n" +
+            "DEQUEUE R0\n" +
+            "DEQUEUE R1\n" +
+            "DEQUEUE R2\n" +
+            "PUSH R0\n" +
+            "PUSH R1\n" +
+            "POP A\n" +
             "END"
         );
 
@@ -148,27 +120,21 @@ public class Main {
         center.add(
             createPanel(
                 "ASSEMBLY PROGRAM",
-                new JScrollPane(
-                    sourceEditor
-                )
+                new JScrollPane(sourceEditor)
             )
         );
 
         center.add(
             createPanel(
                 "EXECUTION TRACE",
-                new JScrollPane(
-                    traceArea
-                )
+                new JScrollPane(traceArea)
             )
         );
 
         center.add(
             createPanel(
                 "CPU STATE",
-                new JScrollPane(
-                    cpuArea
-                )
+                new JScrollPane(cpuArea)
             )
         );
 
@@ -190,7 +156,6 @@ public class Main {
         );
 
         applyTheme();
-
         updateDisplay();
 
         frame.setVisible(true);
@@ -198,8 +163,7 @@ public class Main {
 
     private JPanel createHeader() {
 
-        JPanel panel =
-            new GradientPanel();
+        JPanel panel = new GradientPanel();
 
         panel.setLayout(
             new BorderLayout(
@@ -217,8 +181,7 @@ public class Main {
             )
         );
 
-        JPanel left =
-            new JPanel();
+        JPanel left = new JPanel();
 
         left.setOpaque(false);
 
@@ -229,10 +192,9 @@ public class Main {
             )
         );
 
-        titleLabel =
-            new JLabel(
-                "STC89C52  MICROCONTROLLER  SIMULATOR"
-            );
+        titleLabel = new JLabel(
+            "STC89C52  MICROCONTROLLER  SIMULATOR"
+        );
 
         titleLabel.setFont(
             new Font(
@@ -242,10 +204,9 @@ public class Main {
             )
         );
 
-        JLabel subtitle =
-            new JLabel(
-                "8051 Architecture  •  Instruction Execution"
-            );
+        JLabel subtitle = new JLabel(
+            "8051 Architecture  •  Instruction Execution"
+        );
 
         subtitle.setFont(
             new Font(
@@ -271,25 +232,20 @@ public class Main {
 
         left.add(subtitle);
 
-        JPanel right =
-            new JPanel(
-                new FlowLayout(
-                    FlowLayout.RIGHT,
-                    5,
-                    0
-                )
-            );
+        JPanel right = new JPanel(
+            new FlowLayout(
+                FlowLayout.RIGHT,
+                5,
+                0
+            )
+        );
 
         right.setOpaque(false);
 
-        JLabel chip =
-            badge("●  8-BIT CPU");
+        JLabel chip = badge("●  8-BIT CPU");
+        JLabel team = badge("ONJI BYTE");
 
-        JLabel team =
-            badge("ONJI BYTE");
-
-        JButton mode =
-            new JButton("☀ / ☾");
+        JButton mode = new JButton("☀ / ☾");
 
         mode.setToolTipText(
             "Toggle light / dark mode"
@@ -306,10 +262,7 @@ public class Main {
 
         mode.addActionListener(
             e -> {
-
-                darkMode =
-                    !darkMode;
-
+                darkMode = !darkMode;
                 applyTheme();
             }
         );
@@ -331,12 +284,9 @@ public class Main {
         return panel;
     }
 
-    private JLabel badge(
-        String text
-    ) {
+    private JLabel badge(String text) {
 
-        JLabel label =
-            new JLabel(text);
+        JLabel label = new JLabel(text);
 
         label.setFont(
             new Font(
@@ -346,9 +296,7 @@ public class Main {
             )
         );
 
-        label.setForeground(
-            Color.WHITE
-        );
+        label.setForeground(Color.WHITE);
 
         label.setBorder(
             new EmptyBorder(
@@ -367,8 +315,7 @@ public class Main {
         JComponent component
     ) {
 
-        JPanel panel =
-            new RoundedPanel();
+        JPanel panel = new RoundedPanel();
 
         panel.setLayout(
             new BorderLayout(
@@ -386,8 +333,7 @@ public class Main {
             )
         );
 
-        JLabel label =
-            new JLabel(title);
+        JLabel label = new JLabel(title);
 
         label.setFont(
             new Font(
@@ -425,8 +371,7 @@ public class Main {
 
     private JTextArea createEditor() {
 
-        JTextArea area =
-            new JTextArea();
+        JTextArea area = new JTextArea();
 
         area.setFont(
             new Font(
@@ -454,8 +399,7 @@ public class Main {
 
     private JTextArea createOutputArea() {
 
-        JTextArea area =
-            new JTextArea();
+        JTextArea area = new JTextArea();
 
         area.setFont(
             new Font(
@@ -483,62 +427,56 @@ public class Main {
 
     private JPanel createBottomBar() {
 
-        JPanel panel =
-            new JPanel(
-                new BorderLayout(
-                    10,
-                    6
-                )
-            );
+        JPanel panel = new JPanel(
+            new BorderLayout(
+                10,
+                6
+            )
+        );
 
         panel.setOpaque(false);
 
-        JPanel buttons =
-            new JPanel(
-                new FlowLayout(
-                    FlowLayout.LEFT,
-                    6,
-                    0
-                )
-            );
+        JPanel buttons = new JPanel(
+            new FlowLayout(
+                FlowLayout.LEFT,
+                6,
+                0
+            )
+        );
 
         buttons.setOpaque(false);
 
-        JButton load =
-            createActionButton(
-                "LOAD",
-                ACCENT
-            );
+        JButton load = createActionButton(
+            "LOAD",
+            ACCENT
+        );
 
-        JButton reset =
-            createActionButton(
-                "RESET",
-                new Color(
-                    70,
-                    76,
-                    94
-                )
-            );
+        JButton reset = createActionButton(
+            "RESET",
+            new Color(
+                70,
+                76,
+                94
+            )
+        );
 
-        JButton step =
-            createActionButton(
-                "STEP",
-                new Color(
-                    70,
-                    76,
-                    94
-                )
-            );
+        JButton step = createActionButton(
+            "STEP",
+            new Color(
+                70,
+                76,
+                94
+            )
+        );
 
-        JButton run =
-            createActionButton(
-                "RUN ▶",
-                new Color(
-                    45,
-                    155,
-                    105
-                )
-            );
+        JButton run = createActionButton(
+            "RUN ▶",
+            new Color(
+                45,
+                155,
+                105
+            )
+        );
 
         buttons.add(load);
         buttons.add(reset);
@@ -561,38 +499,29 @@ public class Main {
             e -> runProgram()
         );
 
-        JPanel info =
-            new JPanel(
-                new GridLayout(
-                    2,
-                    1
-                )
-            );
+        JPanel info = new JPanel(
+            new GridLayout(
+                2,
+                1
+            )
+        );
 
         info.setOpaque(false);
 
-        instructionLabel =
-            new JLabel(
-                "Instruction: -"
-            );
-
-        statusLabel =
-            new JLabel(
-                "● READY"
-            );
-
-        info.add(
-            instructionLabel
+        instructionLabel = new JLabel(
+            "Instruction: -"
         );
 
-        info.add(
-            statusLabel
+        statusLabel = new JLabel(
+            "● READY"
         );
 
-        pcLabel =
-            new JLabel(
-                "PC: 0000"
-            );
+        info.add(instructionLabel);
+        info.add(statusLabel);
+
+        pcLabel = new JLabel(
+            "PC: 0000"
+        );
 
         pcLabel.setFont(
             new Font(
@@ -625,8 +554,7 @@ public class Main {
         Color base
     ) {
 
-        JButton button =
-            new JButton(text);
+        JButton button = new JButton(text);
 
         styleButton(
             button,
@@ -667,6 +595,12 @@ public class Main {
         return button;
     }
 
+    /*
+     * Fixed button styling.
+     *
+     * BasicButtonUI prevents the Windows/system
+     * Look & Feel from hiding the button text.
+     */
     private void styleButton(
         JButton button,
         Color base
@@ -680,22 +614,30 @@ public class Main {
             )
         );
 
-        button.setForeground(
-            Color.WHITE
-        );
+        button.setForeground(Color.WHITE);
 
-        button.setBackground(
-            base
-        );
+        button.setBackground(base);
+
+        button.setOpaque(true);
+
+        button.setContentAreaFilled(true);
+
+        button.setBorderPainted(true);
 
         button.setFocusPainted(false);
 
         button.setBorder(
-            new EmptyBorder(
-                7,
-                12,
-                7,
-                12
+            BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(
+                    base,
+                    1
+                ),
+                new EmptyBorder(
+                    7,
+                    12,
+                    7,
+                    12
+                )
             )
         );
 
@@ -703,6 +645,10 @@ public class Main {
             new Cursor(
                 Cursor.HAND_CURSOR
             )
+        );
+
+        button.setUI(
+            new javax.swing.plaf.basic.BasicButtonUI()
         );
     }
 
@@ -778,9 +724,7 @@ public class Main {
             component instanceof RoundedPanel
         ) {
 
-            component.setBackground(
-                panel
-            );
+            component.setBackground(panel);
         }
 
         if (
@@ -791,30 +735,23 @@ public class Main {
                 (JLabel) component;
 
             if (
-                label == instructionLabel
-                ||
+                label == instructionLabel ||
                 label == pcLabel
             ) {
 
-                label.setForeground(
-                    muted
-                );
+                label.setForeground(muted);
 
             } else if (
                 label == statusLabel
             ) {
 
-                label.setForeground(
-                    GREEN
-                );
+                label.setForeground(GREEN);
 
             } else if (
                 label != titleLabel
             ) {
 
-                label.setForeground(
-                    text
-                );
+                label.setForeground(text);
             }
         }
 
@@ -836,8 +773,7 @@ public class Main {
             for (
                 Component child :
                 (
-                    (Container)
-                    component
+                    (Container) component
                 ).getComponents()
             ) {
 
@@ -854,58 +790,52 @@ public class Main {
 
     private void startAnimation() {
 
-        pulseTimer =
-            new Timer(
-                45,
-                e -> {
+        pulseTimer = new Timer(
+            45,
+            e -> {
 
-                    pulse += 0.12f;
+                pulse += 0.12f;
 
-                    if (
-                        pulse > 6.28f
-                    ) {
+                if (
+                    pulse > 6.28f
+                ) {
 
-                        pulse = 0f;
-                    }
+                    pulse = 0f;
+                }
 
-                    if (
-                        statusLabel != null
-                    ) {
+                if (
+                    statusLabel != null
+                ) {
 
-                        int alpha =
-                            170
-                            +
+                    int alpha =
+                        170
+                        +
+                        (int) (
+                            60
+                            *
                             (
-                                int
-                                (
-                                    60
-                                    *
-                                    (
-                                        0.5
-                                        +
-                                        0.5
-                                        *
-                                        Math.sin(
-                                            pulse
-                                        )
-                                    )
-                                )
-                            );
-
-                        statusLabel.setForeground(
-                            new Color(
-                                GREEN.getRed(),
-                                GREEN.getGreen(),
-                                GREEN.getBlue(),
-                                Math.min(
-                                    255,
-                                    alpha
-                                )
+                                0.5
+                                +
+                                0.5
+                                *
+                                Math.sin(pulse)
                             )
                         );
-                    }
+
+                    statusLabel.setForeground(
+                        new Color(
+                            GREEN.getRed(),
+                            GREEN.getGreen(),
+                            GREEN.getBlue(),
+                            Math.min(
+                                255,
+                                alpha
+                            )
+                        )
+                    );
                 }
-            );
+            }
+        );
 
         pulseTimer.start();
     }
@@ -1188,6 +1118,17 @@ public class Main {
             simulator
                 .getCPU()
                 .getState()
+                + "\n"
+                + "────────────────────────────\n"
+                + simulator.getStack().getState()
+                + "\n"
+                + simulator.getQueue().getState()
+                + "\n"
+                + "MEMORY SAMPLE\n"
+                + "00 : " + String.format("%02X", simulator.getMemory().readData(0)) + "\n"
+                + "01 : " + String.format("%02X", simulator.getMemory().readData(1)) + "\n"
+                + "07 : " + String.format("%02X", simulator.getMemory().readData(7)) + "\n"
+                + "08 : " + String.format("%02X", simulator.getMemory().readData(8))
         );
 
         Instruction instruction =
@@ -1383,9 +1324,7 @@ public class Main {
                     )
                 );
 
-            g2.setPaint(
-                gradient
-            );
+            g2.setPaint(gradient);
 
             g2.fillRoundRect(
                 0,
