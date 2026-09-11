@@ -1,34 +1,16 @@
 # Week 3 Queue Flowchart
 
-The Queue flowchart should show this logic when transferred to the final handwritten flowchart:
+The final Queue flowchart should show this decision flow:
 
-```text
-START
-  |
-  v
-Choose Queue Operation
-  |
-  +----------------------+
-  |                      |
-Enqueue                Dequeue
-  |                      |
-Queue Full?            Queue Empty?
-  |                      |
- Yes -> Full Error     Yes -> Empty Error
-  |
- No                     No
-  |                      |
-Add at Rear           Remove from Front
-  |                      |
-Update Rear/Size      Update Front/Size
-  |                      |
-  +----------+-----------+
-             |
-             v
-       Update Queue Status
-             |
-             v
-            END
-```
+1. Start
+2. Check the requested operation
+3. **Enqueue:** check whether the Queue is full
+4. If full → report **Queue Full** and update status
+5. If not full → add the value at the rear and update status
+6. **Dequeue:** check whether the Queue is empty
+7. If empty → report **Queue Empty** and update status
+8. If not empty → remove the value from the front and update status
+9. Display Queue contents/status
+10. End
 
-For the submission, this can be redrawn neatly by hand and added as an image to the `images/` folder.
+A neat handwritten version can be photographed and added to the `images/` folder as the final flowchart evidence.

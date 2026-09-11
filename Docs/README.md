@@ -1,47 +1,58 @@
-# Project File Guide
+# MicroOS-Sim Documentation Guide
 
-This document briefly explains the purpose of each important project file.
+This folder contains the project documentation, meeting records, weekly progress, decisions, design notes, and Week 3 validation material.
 
 ## Source Files (`src/`)
 
-| File | Purpose |
+| File | Use |
 |---|---|
-| `Main.java` | Main UI and user-interface integration for the simulator. |
-| `Simulator.java` | Connects the UI, CPU, Memory, Stack, Queue and program execution flow. |
-| `CPU.java` | CPU state and instruction execution logic, including registers, PC and SP-related execution. |
-| `Instruction.java` | Represents a parsed assembly instruction and its operands. |
-| `InstructionSet.java` | Defines the supported simulator instructions and their execution behavior. |
-| `Memory.java` | Implements memory storage with Read/Write operations and reset/boundary handling. |
-| `Stack.java` | Implements the stack data structure used by PUSH/POP and tracks stack state. |
-| `Queue.java` | Implements the fixed-size FIFO queue used by ENQUEUE/DEQUEUE. |
-| `ExecutionTrace.java` | Records and formats instruction execution information shown in the UI. |
+| `Main.java` | **UI integration** – creates the simulator interface and displays CPU, Memory, Stack, Queue and execution information. |
+| `Simulator.java` | **Simulator integration** – connects the CPU, Memory, Stack, Queue and program execution flow. |
+| `CPU.java` | **CPU execution** – stores CPU state and executes supported instructions. |
+| `Instruction.java` | **Instruction representation** – stores a parsed instruction and its operands. |
+| `InstructionSet.java` | **Instruction definitions** – defines the instructions supported by the simulator. |
+| `Memory.java` | **Memory management** – provides memory Read/Write, reset and address handling. |
+| `Stack.java` | **Stack data structure** – manages Stack Pointer (SP), PUSH and POP operations. |
+| `Queue.java` | **FIFO Queue** – manages ENQUEUE and DEQUEUE operations and queue status. |
+| `ExecutionTrace.java` | **Execution trace** – records instruction execution and displays the execution history. |
 
 ## Programs (`programs/`)
 
-| File | Purpose |
+| File | Use |
 |---|---|
-| `demo.txt` | Demo assembly program used for simulator execution/examples. |
-| `week3_queue_validation.txt` | Week-3 Queue validation program demonstrating multiple ENQUEUE/DEQUEUE operations and FIFO order. |
+| `demo.txt` | General simulator demonstration program. |
+| `week3_queue_validation.txt` | Week 3 Assembly validation program for multiple ENQUEUE/DEQUEUE operations and FIFO ordering. |
 
 ## Tests (`tests/`)
 
-| File | Purpose |
+| File | Use |
 |---|---|
-| `InstructionTest.java` | Tests the existing instruction behavior. |
-| `DemoProgramTest.java` | Tests execution of the demo program. |
-| `Week3InstructionExamples.java` | Contains Week-3 instruction examples used for validation. |
-| `Week3MemoryStackQueueTest.java` | Tests the new Week-3 Memory, Stack and FIFO Queue functionality. |
+| `InstructionTest.java` | Tests the existing instruction behaviour. |
+| `DemoProgramTest.java` | Tests the demo program execution. |
+| `Week3InstructionExamples.java` | Provides examples for the Week 3 instructions. |
+| `Week3MemoryStackQueueTest.java` | Tests Memory, Stack and FIFO Queue functionality added in Week 3. |
 
-## Documentation (`Docs/Week-3/`)
+## Documentation Folders
 
-| File | Purpose |
-|---|---|
-| `QUEUE_FLOWCHART.md` | Queue flowchart covering Enqueue, Dequeue, Empty, Full and status/update conditions. |
+### `Meeting/`
+Contains meeting minutes, discussions, decisions and action items.
+
+### `weekly-status/`
+Contains weekly progress reports including planned work, completed work, pending work, issues and individual responsibilities.
+
+### `decisions/`
+Contains important technical and project decisions made during development.
+
+### `Documents/`
+Contains supporting study and design documents related to the STC89C52, memory, instruction handling and operating-system concepts.
+
+### `Week-3/`
+Contains Week 3 flowchart, status and validation documentation.
 
 ## Images (`images/`)
 
-The `images/week3-instructions/` folder contains the output screenshots for the instruction examples shown in the Week-3 README.
+`images/week3-instructions/` contains the output screenshots used in the Week 3 README for instruction demonstrations.
 
 ## Important Note
 
-`.class` files are compiled Java output files. The main editable/source files are the `.java` files listed above.
+`.class` files are compiled Java output files. The editable project source is contained in the `.java` files under `src/`.
