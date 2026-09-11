@@ -26,8 +26,6 @@ public class InstructionSet {
         // Control Flow
         instructionCategories.put("SJMP", "Control Flow");
 
-        // Team marker / project identity command
-        instructionCategories.put("ONJI", "Team Marker");
 
         // Program Termination
         instructionCategories.put("END", "Program Termination");

@@ -110,10 +110,6 @@ public class Simulator {
                     executeCLR(operand);
                     break;
 
-                case "ONJI":
-                    executeOnjiByte(operand);
-                    break;
-
                 case "PUSH":
                     executePUSH(operand);
                     break;
@@ -440,18 +436,6 @@ public class Simulator {
             // PC has already moved to the next instruction
             // during FETCH, so execution continues normally.
         }
-    }
-
-    // ONJI BYTE - team marker command (no CPU state change)
-    private void executeOnjiByte(String operand) {
-
-        if (!operand.trim().equalsIgnoreCase("BYTE")) {
-            throw new IllegalArgumentException(
-                    "ONJI command must be written as: ONJI BYTE");
-        }
-
-        // Intentionally no hardware state change.
-        // This command identifies the Onji Byte team within the simulator.
     }
 
     // CLR A

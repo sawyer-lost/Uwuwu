@@ -243,7 +243,6 @@ public class Main {
         right.setOpaque(false);
 
         JLabel chip = badge("●  8-BIT CPU");
-        JLabel team = badge("ONJI BYTE");
 
         JButton mode = new JButton("☀ / ☾");
 
@@ -268,7 +267,6 @@ public class Main {
         );
 
         right.add(chip);
-        right.add(team);
         right.add(mode);
 
         panel.add(
