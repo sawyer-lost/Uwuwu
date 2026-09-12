@@ -57,29 +57,7 @@ END
 
 Result: `R0 = 10`, `R1 = 20`, `A = 30`.
 
-## How to Run in VS Code
 
-Open the project folder in VS Code and open the terminal.
-
-### Run the simulator
-
-```bash
-javac src/*.java
-java -cp src Main
-```
-
-### Run the Week 3 tests
-
-```bash
-javac src/*.java tests/Week3MemoryStackQueueTest.java
-java -cp src:tests Week3MemoryStackQueueTest
-```
-
-On Windows, use `;` instead of `:` in the classpath:
-
-```bat
-java -cp src;tests Week3MemoryStackQueueTest
-```
 
 ### Using the simulator
 
@@ -91,24 +69,8 @@ java -cp src;tests Week3MemoryStackQueueTest
 
 ## Queue Flowchart
 
-The handwritten Queue flowchart used for Week 3:
+The flowchart used for Week 3:
 
-![Handwritten FIFO Queue Flowchart](images/week3-flowchart/queue-flowchart-handwritten.png)
+![ FIFO Queue Flowchart](images/QueueStack.png)
 
 It covers Enqueue, Dequeue, Queue Full, Queue Empty, status/update and the FIFO order.
-
-## Queue Assembly Validation
-
-Validation program:
-
-`programs/week3_queue_validation.txt`
-
-It performs multiple Enqueue and Dequeue operations and checks that values leave the queue in the same order they entered.
-
-## Week 3 Documentation
-
-- `Docs/README.md` – what the main project files are used for
-- `Docs/Week-3/` – Week 3 flowchart/status notes
-- `Docs/Meeting/` – meeting records
-- `Docs/weekly-status/` – weekly progress
-- `Docs/decisions/` – project decisions
