@@ -29,12 +29,3 @@ Assembly/program input → CPU/simulator executes DEQUEUE → value is removed f
 ## Validation
 
 The Queue validation program demonstrates multiple ENQUEUE and DEQUEUE operations. The expected output is compared with the actual simulator execution to verify FIFO behaviour.
-
-
-## Submission Evidence Update
-
-- The UI now displays the complete 256-byte data-memory map with address/value pairs.
-- CPU STATE displays the Stack Pointer, stack contents/status, and FIFO queue contents/status.
-- Week 3 tests cover Memory read/write/reset, Stack LIFO, Stack underflow/overflow, Queue FIFO, and Queue empty/full boundary conditions.
-- Queue Assembly validation records both expected and actual register results: R0=0A, R1=14, R2=1E.
-- Assembly execution result is recorded as PASS for execution through the simulator.

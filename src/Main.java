@@ -90,25 +90,37 @@ public class Main {
         sourceEditor = createEditor();
         traceArea = createOutputArea();
         cpuArea = createOutputArea();
-        memoryArea = createOutputArea();
-        memoryArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
+        memoryArea = createMemoryArea();
 
+        // Default Week-3 demo includes every supported Week-2 and Week-3 instruction.
         sourceEditor.setText(
             "MOV A,#10\n" +
-            "ENQUEUE A\n" +
-            "MOV A,#20\n" +
-            "ENQUEUE A\n" +
-            "MOV A,#30\n" +
-            "ENQUEUE A\n" +
-            "DEQUEUE R0\n" +
-            "DEQUEUE R1\n" +
-            "DEQUEUE R2\n" +
-            "PUSH R0\n" +
-            "PUSH R1\n" +
-            "POP A\n" +
+            "MOV R0,#20\n" +
+            "XCH A,R0\n" +
+            "ADD A,#5\n" +
+            "SUBB A,#5\n" +
+            "INC A\n" +
+            "DEC A\n" +
+            "ANL A,#0F\n" +
+            "ORL A,#33\n" +
+            "CLR A\n" +
+            "PUSH #10\n" +
+            "PUSH #20\n" +
+            "POP R1\n" +
+            "POP R2\n" +
+            "ENQUEUE #10\n" +
+            "ENQUEUE #20\n" +
+            "ENQUEUE #30\n" +
+            "DEQUEUE R3\n" +
+            "DEQUEUE R4\n" +
+            "DEQUEUE R5\n" +
+            "SJMP 1\n" +
+            "MOV A,#99\n" +
             "END"
         );
 
+        // Four-panel layout keeps the Week-2 style while giving Week-3
+        // Memory, Stack and FIFO Queue their own visible areas.
         center = new JPanel(
             new GridLayout(
                 2,
@@ -122,7 +134,7 @@ public class Main {
 
         center.add(
             createPanel(
-                "ASSEMBLY PROGRAM",
+                "ASSEMBLY PROGRAM  •  WEEK 2 + WEEK 3",
                 new JScrollPane(sourceEditor)
             )
         );
@@ -402,6 +414,14 @@ public class Main {
             )
         );
 
+        return area;
+    }
+
+    private JTextArea createMemoryArea() {
+
+        JTextArea area = createOutputArea();
+        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
+        area.setLineWrap(false);
         return area;
     }
 
@@ -706,6 +726,8 @@ public class Main {
         memoryArea.setBackground(input);
 
         memoryArea.setForeground(text);
+
+        memoryArea.setCaretColor(text);
 
         if (titleLabel != null) {
             titleLabel.setForeground(
@@ -1124,6 +1146,21 @@ public class Main {
         updateDisplay();
     }
 
+    private String buildMemoryView() {
+        StringBuilder out = new StringBuilder();
+        out.append("ADDR   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n");
+        out.append("──────────────────────────────────────────────────────────────\n");
+        for (int base = 0; base < 256; base += 16) {
+            out.append(String.format("%02X :  ", base));
+            for (int offset = 0; offset < 16; offset++) {
+                out.append(String.format("%02X", simulator.getMemory().readData(base + offset)));
+                if (offset < 15) out.append(" ");
+            }
+            out.append('\n');
+        }
+        return out.toString();
+    }
+
     private void updateDisplay() {
 
         cpuArea.setText(
@@ -1135,20 +1172,10 @@ public class Main {
                 + simulator.getStack().getState()
                 + "\n"
                 + simulator.getQueue().getState()
-                + "\n"
         );
 
-        StringBuilder memoryText = new StringBuilder();
-        memoryText.append("DATA MEMORY — 256 BYTES\n");
-        memoryText.append("Address : Value\n");
-        memoryText.append("────────────────────────\n");
-        for (int address = 0; address < 256; address++) {
-            memoryText.append(String.format("%02X      : %02X", address,
-                    simulator.getMemory().readData(address)));
-            if ((address + 1) % 4 == 0) memoryText.append("\n");
-            else memoryText.append("    ");
-        }
-        memoryArea.setText(memoryText.toString());
+        memoryArea.setText(buildMemoryView());
+        memoryArea.setCaretPosition(0);
 
         Instruction instruction =
             simulator
