@@ -12,7 +12,6 @@ public class Main {
     private JTextArea sourceEditor;
     private JTextArea traceArea;
     private JTextArea cpuArea;
-    private JTextArea memoryArea;
 
     private JLabel statusLabel;
     private JLabel instructionLabel;
@@ -90,41 +89,27 @@ public class Main {
         sourceEditor = createEditor();
         traceArea = createOutputArea();
         cpuArea = createOutputArea();
-        memoryArea = createMemoryArea();
 
-        // Default Week-3 demo includes every supported Week-2 and Week-3 instruction.
+        // Keep the editor clean: show a short example using both Week-2
+        // and Week-3 instructions. Users can enter any supported instruction.
         sourceEditor.setText(
             "MOV A,#10\n" +
             "MOV R0,#20\n" +
-            "XCH A,R0\n" +
-            "ADD A,#5\n" +
-            "SUBB A,#5\n" +
-            "INC A\n" +
-            "DEC A\n" +
-            "ANL A,#0F\n" +
-            "ORL A,#33\n" +
-            "CLR A\n" +
-            "PUSH #10\n" +
-            "PUSH #20\n" +
+            "ADD A,R0\n" +
+            "PUSH A\n" +
             "POP R1\n" +
-            "POP R2\n" +
             "ENQUEUE #10\n" +
             "ENQUEUE #20\n" +
-            "ENQUEUE #30\n" +
-            "DEQUEUE R3\n" +
-            "DEQUEUE R4\n" +
-            "DEQUEUE R5\n" +
-            "SJMP 1\n" +
-            "MOV A,#99\n" +
+            "DEQUEUE R2\n" +
             "END"
         );
 
-        // Four-panel layout keeps the Week-2 style while giving Week-3
-        // Memory, Stack and FIFO Queue their own visible areas.
+        // Week-2-style three-panel layout. The right panel is the single
+        // CPU STATE view; SP, Stack and FIFO status remain part of that state.
         center = new JPanel(
             new GridLayout(
-                2,
-                2,
+                1,
+                3,
                 12,
                 12
             )
@@ -148,15 +133,8 @@ public class Main {
 
         center.add(
             createPanel(
-                "CPU + STACK + FIFO QUEUE STATE",
+                "CPU STATE",
                 new JScrollPane(cpuArea)
-            )
-        );
-
-        center.add(
-            createPanel(
-                "MEMORY (256-BYTE DATA MEMORY)",
-                new JScrollPane(memoryArea)
             )
         );
 
@@ -414,14 +392,6 @@ public class Main {
             )
         );
 
-        return area;
-    }
-
-    private JTextArea createMemoryArea() {
-
-        JTextArea area = createOutputArea();
-        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
-        area.setLineWrap(false);
         return area;
     }
 
@@ -722,12 +692,6 @@ public class Main {
         cpuArea.setBackground(input);
 
         cpuArea.setForeground(text);
-
-        memoryArea.setBackground(input);
-
-        memoryArea.setForeground(text);
-
-        memoryArea.setCaretColor(text);
 
         if (titleLabel != null) {
             titleLabel.setForeground(
@@ -1146,21 +1110,6 @@ public class Main {
         updateDisplay();
     }
 
-    private String buildMemoryView() {
-        StringBuilder out = new StringBuilder();
-        out.append("ADDR   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n");
-        out.append("──────────────────────────────────────────────────────────────\n");
-        for (int base = 0; base < 256; base += 16) {
-            out.append(String.format("%02X :  ", base));
-            for (int offset = 0; offset < 16; offset++) {
-                out.append(String.format("%02X", simulator.getMemory().readData(base + offset)));
-                if (offset < 15) out.append(" ");
-            }
-            out.append('\n');
-        }
-        return out.toString();
-    }
-
     private void updateDisplay() {
 
         cpuArea.setText(
@@ -1173,9 +1122,6 @@ public class Main {
                 + "\n"
                 + simulator.getQueue().getState()
         );
-
-        memoryArea.setText(buildMemoryView());
-        memoryArea.setCaretPosition(0);
 
         Instruction instruction =
             simulator
