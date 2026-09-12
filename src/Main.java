@@ -12,6 +12,7 @@ public class Main {
     private JTextArea sourceEditor;
     private JTextArea traceArea;
     private JTextArea cpuArea;
+    private JTextArea memoryArea;
 
     private JLabel statusLabel;
     private JLabel instructionLabel;
@@ -89,6 +90,8 @@ public class Main {
         sourceEditor = createEditor();
         traceArea = createOutputArea();
         cpuArea = createOutputArea();
+        memoryArea = createOutputArea();
+        memoryArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
 
         sourceEditor.setText(
             "MOV A,#10\n" +
@@ -108,10 +111,10 @@ public class Main {
 
         center = new JPanel(
             new GridLayout(
-                1,
-                3,
+                2,
+                2,
                 12,
-                0
+                12
             )
         );
 
@@ -133,8 +136,15 @@ public class Main {
 
         center.add(
             createPanel(
-                "CPU STATE",
+                "CPU + STACK + FIFO QUEUE STATE",
                 new JScrollPane(cpuArea)
+            )
+        );
+
+        center.add(
+            createPanel(
+                "MEMORY (256-BYTE DATA MEMORY)",
+                new JScrollPane(memoryArea)
             )
         );
 
@@ -693,6 +703,10 @@ public class Main {
 
         cpuArea.setForeground(text);
 
+        memoryArea.setBackground(input);
+
+        memoryArea.setForeground(text);
+
         if (titleLabel != null) {
             titleLabel.setForeground(
                 Color.WHITE
@@ -1122,12 +1136,19 @@ public class Main {
                 + "\n"
                 + simulator.getQueue().getState()
                 + "\n"
-                + "MEMORY SAMPLE\n"
-                + "00 : " + String.format("%02X", simulator.getMemory().readData(0)) + "\n"
-                + "01 : " + String.format("%02X", simulator.getMemory().readData(1)) + "\n"
-                + "07 : " + String.format("%02X", simulator.getMemory().readData(7)) + "\n"
-                + "08 : " + String.format("%02X", simulator.getMemory().readData(8))
         );
+
+        StringBuilder memoryText = new StringBuilder();
+        memoryText.append("DATA MEMORY — 256 BYTES\n");
+        memoryText.append("Address : Value\n");
+        memoryText.append("────────────────────────\n");
+        for (int address = 0; address < 256; address++) {
+            memoryText.append(String.format("%02X      : %02X", address,
+                    simulator.getMemory().readData(address)));
+            if ((address + 1) % 4 == 0) memoryText.append("\n");
+            else memoryText.append("    ");
+        }
+        memoryArea.setText(memoryText.toString());
 
         Instruction instruction =
             simulator

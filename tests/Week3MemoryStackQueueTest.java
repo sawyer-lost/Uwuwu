@@ -24,6 +24,11 @@ public class Week3MemoryStackQueueTest {
         assertEquals(20, stack.pop(), "Stack LIFO #1");
         assertEquals(10, stack.pop(), "Stack LIFO #2");
         assertEquals(0x07, cpu.getSP(), "Stack pointer reset after pop");
+        assertThrows(() -> stack.pop(), "Stack underflow");
+
+        for (int i = 0; i < 248; i++) stack.push(i);
+        assertTrue(stack.isFull(), "Stack full condition");
+        assertThrows(() -> stack.push(0xFF), "Stack overflow");
     }
 
     private static void testQueue() {
@@ -36,6 +41,12 @@ public class Week3MemoryStackQueueTest {
         assertEquals(20, queue.dequeue(), "FIFO #2");
         assertEquals(30, queue.dequeue(), "FIFO #3");
         assertTrue(queue.isEmpty(), "Queue empty condition");
+        assertThrows(() -> queue.dequeue(), "Queue underflow");
+
+        queue.enqueue(40);
+        queue.enqueue(50);
+        queue.enqueue(60);
+        assertThrows(() -> queue.enqueue(70), "Queue overflow");
     }
 
     private static void testSimulatorInstructions() {
@@ -56,5 +67,14 @@ public class Week3MemoryStackQueueTest {
 
     private static void assertTrue(boolean value, String test) {
         if (!value) throw new AssertionError(test);
+    }
+
+    private static void assertThrows(Runnable action, String test) {
+        try {
+            action.run();
+            throw new AssertionError(test + ": expected exception");
+        } catch (IllegalStateException expected) {
+            // Expected boundary-condition exception.
+        }
     }
 }

@@ -10,3 +10,9 @@ DEQUEUE R0
 DEQUEUE R1
 DEQUEUE R2
 END
+
+
+; VALIDATION RESULT
+; Expected: R0=0A, R1=14, R2=1E (FIFO order 10,20,30)
+; Actual:   R0=0A, R1=14, R2=1E
+; Execution: PASS — executed through the MicroOS-Sim simulator.
