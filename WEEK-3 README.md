@@ -71,6 +71,6 @@ Result: `R0 = 10`, `R1 = 20`, `A = 30`.
 
 The flowchart used for Week 3:
 
-![ FIFO Queue Flowchart](images/QueueStack.png)
+![ FIFO Queue Flowchart](images/Queuestack.png)
 
 It covers Enqueue, Dequeue, Queue Full, Queue Empty, status/update and the FIFO order.
